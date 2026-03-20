@@ -19,7 +19,7 @@ var (
 	errOpenLogFile = errors.New("failed to open log file")
 )
 
-type ZapLogger struct {
+type Zap struct {
 	Sugar *zap.SugaredLogger
 }
 

@@ -10,7 +10,7 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-func LoggerSetup(req *Params) (*zap.SugaredLogger, error) {
+func Setup(req *Params) (*zap.SugaredLogger, error) {
 	logPath, err := validateRequest(req)
 	if err != nil {
 		return nil, err
