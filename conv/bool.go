@@ -4,48 +4,48 @@ import (
 	"strconv"
 )
 
-func stringToBool(value string) bool {
+func stringToBool(value string, def bool) bool {
 	if value == "" {
-		return false
+		return def
 	}
 	
 	result, err := strconv.ParseBool(value)
 	if err != nil {
-		return false
+		return def
 	}
 	
 	return result
 }
 
-func StringToBool(value string) bool {
-	return stringToBool(value)
+func StringToBool(value string, def bool) bool {
+	return stringToBool(value, def)
 }
 
-func StringToBoolPtr(value string) *bool {
+func StringToBoolPtr(value string, def bool) *bool {
 	if value == "" {
-		return nil
+		return &def
 	}
 	
 	result, err := strconv.ParseBool(value)
 	if err != nil {
-		return nil
+		return &def
 	}
 	
 	return &result
 }
 
-func StringPtrToBool(value *string) bool {
+func StringPtrToBool(value *string, def bool) bool {
 	if value == nil {
-		return false
+		return def
 	}
 	
-	return StringToBool(*value)
+	return StringToBool(*value, def)
 }
 
-func StringPtrToBoolPtr(value *string) *bool {
+func StringPtrToBoolPtr(value *string, def bool) *bool {
 	if value == nil {
 		return nil
 	}
 	
-	return StringToBoolPtr(*value)
+	return StringToBoolPtr(*value, def)
 }
