@@ -4,65 +4,58 @@ import (
 	"strconv"
 )
 
-func stringToInt[T ~int | ~int8 | ~int16 | ~int32 | ~int64](value string) (T, error) {
-	var bitSize int
-	
-	switch any(*new(T)).(type) {
-	case int8:
-		bitSize = 8
-	case int16:
-		bitSize = 16
-	case int32:
-		bitSize = 32
-	case int64:
-		bitSize = 64
-	default:
-		bitSize = strconv.IntSize
-	}
-	
-	result, err := strconv.ParseInt(value, 10, bitSize)
+func stringToInt[T ~int | ~int8 | ~int16 | ~int32 | ~int64](value string, def T) T {
+	v, err := strconv.ParseInt(value, 10, 64)
 	if err != nil {
-		return 0, err
+		return def
 	}
 	
-	return T(result), nil
+	result := T(v)
+	if int64(result) != v {
+		return def
+	}
+	
+	return result
 }
 
-func StringToInt[T ~int | ~int8 | ~int16 | ~int32 | ~int64](value string) (T, error) {
+func StringToInt[T ~int | ~int8 | ~int16 | ~int32 | ~int64](value string, def T) T {
 	if value == "" {
-		return 0, nil
+		return def
 	}
 	
-	return stringToInt[T](value)
+	return stringToInt(value, def)
 }
 
-func StringToIntPtr[T ~int | ~int8 | ~int16 | ~int32 | ~int64](value string) (*T, error) {
+func StringToIntPtr[T ~int | ~int8 | ~int16 | ~int32 | ~int64](value string, def T) *T {
 	if value == "" {
-		return nil, nil
+		return &def
 	}
 	
-	result, err := stringToInt[T](value)
-	if err != nil {
-		return nil, err
-	}
+	var zero T
 	
-	return &result, nil
+	result := StringToInt(value, zero)
+	
+	return &result
 }
 
-func StringPtrToInt[T ~int | ~int8 | ~int16 | ~int32 | ~int64](value *string) (T, error) {
+func StringPtrToInt[T ~int | ~int8 | ~int16 | ~int32 | ~int64](value *string, def T) T {
 	if value == nil {
-		return 0, nil
+		return def
 	}
 	
-	return StringToInt[T](*value)
+	return StringToInt(*value, def)
 }
 
-func StringPtrToIntPtr[T ~int | ~int8 | ~int16 | ~int32 | ~int64](value *string) (*T, error) {
+func StringPtrToIntPtr[T ~int | ~int8 | ~int16 | ~int32 | ~int64](value *string, def T) *T {
 	if value == nil {
-		return nil, nil
+		return &def
 	}
 	
-	return StringToIntPtr[T](*value)
+	var zero T
+	
+	result := StringToInt(*value, zero)
+	
+	return &result
 }
 
 func floatToInt[T ~float32 | ~float64](value T) int {
