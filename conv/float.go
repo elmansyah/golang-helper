@@ -1,10 +1,11 @@
 package conv
 
 import (
+	"fmt"
 	"strconv"
 )
 
-func intToFloat[T ~int | ~int8 | ~int16 | ~int32 | ~int64, Result ~float32 | ~float64](value T) Result {
+func convIntToFloat[T ~int | ~int8 | ~int16 | ~int32 | ~int64, Result ~float32 | ~float64](value T) Result {
 	return Result(value)
 }
 
@@ -13,7 +14,7 @@ func IntToFloat[T ~int | ~int8 | ~int16 | ~int32 | ~int64, Result ~float32 | ~fl
 		return 0
 	}
 	
-	return intToFloat[T, Result](value)
+	return convIntToFloat[T, Result](value)
 }
 
 func IntToFloatPtr[T ~int | ~int8 | ~int16 | ~int32 | ~int64, Result ~float32 | ~float64](value T) *Result {
@@ -21,7 +22,7 @@ func IntToFloatPtr[T ~int | ~int8 | ~int16 | ~int32 | ~int64, Result ~float32 | 
 		return nil
 	}
 	
-	result := intToFloat[T, Result](value)
+	result := convIntToFloat[T, Result](value)
 	
 	return &result
 }
@@ -31,7 +32,7 @@ func IntPtrToFloat[T ~int | ~int8 | ~int16 | ~int32 | ~int64, Result ~float32 | 
 		return 0
 	}
 	
-	return intToFloat[T, Result](*value)
+	return convIntToFloat[T, Result](*value)
 }
 
 func IntPtrToFloatPtr[T ~int | ~int8 | ~int16 | ~int32 | ~int64, Result ~float32 | ~float64](value *T) *Result {
@@ -39,12 +40,12 @@ func IntPtrToFloatPtr[T ~int | ~int8 | ~int16 | ~int32 | ~int64, Result ~float32
 		return nil
 	}
 	
-	result := intToFloat[T, Result](*value)
+	result := convIntToFloat[T, Result](*value)
 	
 	return &result
 }
 
-func stringToFloat[T ~float32 | ~float64](value string) (T, error) {
+func convStringToFloat[T ~float32 | ~float64](value string) (T, error) {
 	var bitSize int
 	
 	switch any(*new(T)).(type) {
@@ -56,7 +57,7 @@ func stringToFloat[T ~float32 | ~float64](value string) (T, error) {
 	
 	result, err := strconv.ParseFloat(value, bitSize)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("%v", err)
 	}
 	
 	return T(result), nil
@@ -67,7 +68,7 @@ func StringToFloat[T ~float32 | ~float64](value string) (T, error) {
 		return 0, nil
 	}
 	
-	return stringToFloat[T](value)
+	return convStringToFloat[T](value)
 }
 
 func StringToFloatPtr[T ~float32 | ~float64](value string) (*T, error) {
@@ -75,7 +76,7 @@ func StringToFloatPtr[T ~float32 | ~float64](value string) (*T, error) {
 		return nil, nil
 	}
 	
-	result, err := stringToFloat[T](value)
+	result, err := convStringToFloat[T](value)
 	if err != nil {
 		return nil, err
 	}
@@ -99,16 +100,16 @@ func StringPtrToFloatPtr[T ~float32 | ~float64](value *string) (*T, error) {
 	return StringToFloatPtr[T](*value)
 }
 
-func boolToFloat[T ~float32 | ~float64](value bool) T {
-	if !value {
-		return 0
+func convBoolToFloat[T ~float32 | ~float64](value bool) T {
+	if value {
+		return 1
 	}
 	
-	return 1
+	return 0
 }
 
 func BoolToFloat[T ~float32 | ~float64](value bool) T {
-	return boolToFloat[T](value)
+	return convBoolToFloat[T](value)
 }
 
 func BoolToFloatPtr[T ~float32 | ~float64](value bool) *T {

@@ -235,6 +235,7 @@ func ParseDateTime(value string) time.Time {
 	}
 	
 	if result.IsZero() {
+		//nolint:revive
 		return time.Date(0001, 1, 1, 0, 0, 0, 0, time.UTC)
 	}
 	

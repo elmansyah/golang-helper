@@ -4,7 +4,11 @@ import (
 	"strconv"
 )
 
-func intToString[T ~int | ~int8 | ~int16 | ~int32 | ~int64](value T) string {
+var (
+	trueString = "true"
+)
+
+func convIntToString[T ~int | ~int8 | ~int16 | ~int32 | ~int64](value T) string {
 	return strconv.FormatInt(int64(value), 10)
 }
 
@@ -13,7 +17,7 @@ func IntToString[T ~int | ~int8 | ~int16 | ~int32 | ~int64](value T) string {
 		return ""
 	}
 	
-	return intToString(value)
+	return convIntToString(value)
 }
 
 func IntToStringPtr[T ~int | ~int8 | ~int16 | ~int32 | ~int64](value T) *string {
@@ -21,7 +25,7 @@ func IntToStringPtr[T ~int | ~int8 | ~int16 | ~int32 | ~int64](value T) *string 
 		return nil
 	}
 	
-	result := intToString(value)
+	result := convIntToString(value)
 	
 	return &result
 }
@@ -31,7 +35,7 @@ func IntPtrToString[T ~int | ~int8 | ~int16 | ~int32 | ~int64](value *T) string 
 		return ""
 	}
 	
-	result := intToString(*value)
+	result := convIntToString(*value)
 	
 	return result
 }
@@ -41,12 +45,12 @@ func IntPtrToStringPtr[T ~int | ~int8 | ~int16 | ~int32 | ~int64](value *T) *str
 		return nil
 	}
 	
-	result := intToString(*value)
+	result := convIntToString(*value)
 	
 	return &result
 }
 
-func uintToString[T ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64](value T) string {
+func convUintToString[T ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64](value T) string {
 	return strconv.FormatUint(uint64(value), 10)
 }
 
@@ -55,7 +59,7 @@ func UintToString[T ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64](value T) strin
 		return ""
 	}
 	
-	return uintToString(value)
+	return convUintToString(value)
 }
 
 func UintToStringPtr[T ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64](value T) *string {
@@ -63,7 +67,7 @@ func UintToStringPtr[T ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64](value T) *s
 		return nil
 	}
 	
-	result := uintToString(value)
+	result := convUintToString(value)
 	
 	return &result
 }
@@ -73,7 +77,7 @@ func UintPtrToString[T ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64](value *T) s
 		return ""
 	}
 	
-	return uintToString(*value)
+	return convUintToString(*value)
 }
 
 func UintPtrToStringPtr[T ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64](value *T) *string {
@@ -81,12 +85,12 @@ func UintPtrToStringPtr[T ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64](value *T
 		return nil
 	}
 	
-	result := uintToString(*value)
+	result := convUintToString(*value)
 	
 	return &result
 }
 
-func floatToString[T ~float32 | ~float64](value T) string {
+func convFloatToString[T ~float32 | ~float64](value T) string {
 	var bitSize int
 	
 	switch any(value).(type) {
@@ -104,7 +108,7 @@ func FloatToString[T ~float32 | ~float64](value T) string {
 		return ""
 	}
 	
-	return floatToString(value)
+	return convFloatToString(value)
 }
 
 func FloatToStringPtr[T ~float32 | ~float64](value T) *string {
@@ -112,7 +116,7 @@ func FloatToStringPtr[T ~float32 | ~float64](value T) *string {
 		return nil
 	}
 	
-	result := floatToString(value)
+	result := convFloatToString(value)
 	
 	return &result
 }
@@ -122,7 +126,7 @@ func FloatPtrToString[T ~float32 | ~float64](value *T) string {
 		return ""
 	}
 	
-	return floatToString(*value)
+	return convFloatToString(*value)
 }
 
 func FloatPtrToStringPtr[T ~float32 | ~float64](value *T) *string {
@@ -130,21 +134,21 @@ func FloatPtrToStringPtr[T ~float32 | ~float64](value *T) *string {
 		return nil
 	}
 	
-	result := floatToString(*value)
+	result := convFloatToString(*value)
 	
 	return &result
 }
 
-func boolToString(value bool) string {
+func convBoolToString(value bool) string {
 	if !value {
 		return ""
 	}
 	
-	return "true"
+	return trueString
 }
 
 func BoolToString(value bool) string {
-	return boolToString(value)
+	return convBoolToString(value)
 }
 
 func BoolToStringPtr(value bool) *string {
@@ -162,7 +166,7 @@ func BoolPtrToString(value *bool) string {
 		return ""
 	}
 	
-	return boolToString(*value)
+	return convBoolToString(*value)
 }
 
 func BoolPtrToStringPtr(value *bool) *string {

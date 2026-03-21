@@ -4,7 +4,7 @@ import (
 	"strconv"
 )
 
-func stringToBool(value string, def bool) bool {
+func convStringToBool(value string, def bool) bool {
 	if value == "" {
 		return def
 	}
@@ -18,7 +18,7 @@ func stringToBool(value string, def bool) bool {
 }
 
 func StringToBool(value string, def bool) bool {
-	return stringToBool(value, def)
+	return convStringToBool(value, def)
 }
 
 func StringToBoolPtr(value string, def bool) *bool {
