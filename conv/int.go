@@ -4,7 +4,7 @@ import (
 	"strconv"
 )
 
-func stringToInt[T ~int | ~int8 | ~int16 | ~int32 | ~int64](value string, def T) T {
+func convStringToInt[T ~int | ~int8 | ~int16 | ~int32 | ~int64](value string, def T) T {
 	val, err := strconv.ParseInt(value, 10, 64)
 	if err != nil {
 		return def
@@ -18,12 +18,12 @@ func stringToInt[T ~int | ~int8 | ~int16 | ~int32 | ~int64](value string, def T)
 	return result
 }
 
-func convStringToInt[T ~int | ~int8 | ~int16 | ~int32 | ~int64](value string, def T) T {
+func StringToInt[T ~int | ~int8 | ~int16 | ~int32 | ~int64](value string, def T) T {
 	if value == "" {
 		return def
 	}
 	
-	return stringToInt(value, def)
+	return convStringToInt(value, def)
 }
 
 func StringToIntPtr[T ~int | ~int8 | ~int16 | ~int32 | ~int64](value string, def T) *T {
