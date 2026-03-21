@@ -6,11 +6,11 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func New() Godotenv {
+func New() App {
 	return &Params{}
 }
 
-type Setup func() Godotenv
+type Setup func() App
 
 func (params *Params) Load() string {
 	if err := godotenv.Load(".env"); err != nil {

@@ -2,6 +2,6 @@ package godotenv
 
 type Params struct{}
 
-type Godotenv interface {
+type App interface {
 	Load() string
 }
