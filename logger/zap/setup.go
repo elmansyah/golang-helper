@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -16,14 +17,31 @@ func Setup(req *Params) (*zap.SugaredLogger, error) {
 		return nil, err
 	}
 	
-	cores := make([]zapcore.Core, 0, len(req.LogFiles))
+	encoderCfg := zapcore.EncoderConfig{
+		TimeKey:      "timestamp",
+		LevelKey:     "level",
+		MessageKey:   "message",
+		CallerKey:    "caller",
+		EncodeTime:   zapcore.ISO8601TimeEncoder,
+		EncodeLevel:  zapcore.LowercaseLevelEncoder,
+		EncodeCaller: zapcore.ShortCallerEncoder,
+	}
 	
+	// normalize app mode
+	mode := strings.ToLower(req.AppMode)
+	if mode != "dev" && mode != "prod" {
+		mode = "prod"
+	}
+	
+	cores := make([]zapcore.Core, 0, len(req.LogFiles)+1)
+	
+	// build file cores
 	for _, logRequest := range req.LogFiles {
 		if logRequest.FileName == "" {
 			return nil, errFileNameRequired
 		}
 		
-		core, err := buildZap(logPath, req, logRequest)
+		core, err := buildZap(logPath, req, logRequest, encoderCfg)
 		if err != nil {
 			return nil, err
 		}
@@ -31,22 +49,49 @@ func Setup(req *Params) (*zap.SugaredLogger, error) {
 		cores = append(cores, core)
 	}
 	
+	// console level based on mode
+	var consoleLevel zapcore.Level
+	if mode == "dev" {
+		consoleLevel = zapcore.DebugLevel
+	} else {
+		consoleLevel = zapcore.InfoLevel
+	}
+	
+	// console core (stdout only)
+	consoleEncoder := zapcore.NewConsoleEncoder(encoderCfg)
+	consoleCore := zapcore.NewCore(
+		consoleEncoder,
+		zapcore.AddSync(os.Stdout),
+		consoleLevel,
+	)
+	
+	cores = append(cores, consoleCore)
+	
 	combined := zapcore.NewTee(cores...)
-	logger := zap.New(combined)
+	
+	logger := zap.New(
+		combined,
+		zap.AddCaller(),
+		zap.AddCallerSkip(1),
+		zap.AddStacktrace(zapcore.ErrorLevel),
+	)
 	
 	return logger.Sugar(), nil
 }
 
-func buildZap(logPath string, request *Params, file File) (zapcore.Core, error) {
+func buildZap(logPath string, request *Params, file File, encoderCfg zapcore.EncoderConfig) (zapcore.Core, error) {
 	fullPath := filepath.Join(logPath, file.FileName)
 	
-	// By default file permission handled by lumberjack, but we need to check it again
+	// ensure file can be created with correct permission
 	openFile, err := os.OpenFile(fullPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, request.FilePermission)
 	if err != nil {
-		return nil, errOpenLogFile
+		return nil, fmt.Errorf("%w: %s", errOpenLogFile, fullPath)
 	}
 	
-	openFile.Close()
+	err = openFile.Close()
+	if err != nil {
+		return nil, fmt.Errorf("%w: %s", errCloseLogFile, fullPath)
+	}
 	
 	writer := zapcore.AddSync(&lumberjack.Logger{
 		Filename:   fullPath,
@@ -56,22 +101,17 @@ func buildZap(logPath string, request *Params, file File) (zapcore.Core, error) 
 		Compress:   request.Compress,
 	})
 	
-	multiWriter := zapcore.NewMultiWriteSyncer(writer, zapcore.AddSync(os.Stdout))
-	encoderCfg := zap.NewProductionEncoderConfig()
-	
-	encoderCfg.TimeKey = "timestamp"
-	encoderCfg.MessageKey = "message"
-	encoderCfg.EncodeTime = zapcore.ISO8601TimeEncoder
-	encoderCfg.EncodeLevel = zapcore.CapitalLevelEncoder
-	
+	// file encoder always JSON (structured logging)
 	encoder := zapcore.NewJSONEncoder(encoderCfg)
+	
+	if file.MinLevel > file.MaxLevel {
+		return nil, errInvalidLevelRange
+	}
 	
 	return zapcore.NewCore(
 		encoder,
-		multiWriter,
-		zap.LevelEnablerFunc(func(level zapcore.Level) bool {
-			return level >= file.Level
-		}),
+		writer,
+		levelEnabler(file),
 	), nil
 }
 
@@ -81,7 +121,7 @@ func validateRequest(request *Params) (string, error) {
 	}
 	
 	if err := os.MkdirAll(request.LogDir, request.DirPermission); err != nil {
-		return "", fmt.Errorf("%v: %w", errCreateDir, err)
+		return "", fmt.Errorf("%w: %w", errCreateDir, err)
 	}
 	
 	return request.LogDir, nil
@@ -108,5 +148,11 @@ func setDefaultPermission(request *Params) {
 	
 	if request.FilePermission == 0 {
 		request.FilePermission = 0644
+	}
+}
+
+func levelEnabler(file File) zap.LevelEnablerFunc {
+	return func(level zapcore.Level) bool {
+		return level >= file.MinLevel && level <= file.MaxLevel
 	}
 }

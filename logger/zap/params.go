@@ -9,14 +9,13 @@ import (
 )
 
 var (
-	// validation errors
-	errNilRequest       = errors.New("request is nil")
-	errDirRequired      = errors.New("logger config: base path is required")
-	errFileNameRequired = errors.New("logger config: file name is required")
-	
-	// runtime errors
-	errCreateDir   = errors.New("failed to create directory")
-	errOpenLogFile = errors.New("failed to open log file")
+	errNilRequest        = errors.New("logger config: request is nil")
+	errDirRequired       = errors.New("logger config: base path is required")
+	errFileNameRequired  = errors.New("logger config: file name is required")
+	errCreateDir         = errors.New("logger config: failed to create directory")
+	errOpenLogFile       = errors.New("logger config: failed to open log file")
+	errCloseLogFile      = errors.New("logger config: failed to close log file")
+	errInvalidLevelRange = errors.New("logger config: min level must be less than or equal to max level")
 )
 
 type Zap struct {
@@ -25,10 +24,12 @@ type Zap struct {
 
 type File struct {
 	FileName string
-	Level    zapcore.Level
+	MinLevel zapcore.Level
+	MaxLevel zapcore.Level
 }
 
 type Params struct {
+	AppMode        string
 	LogDir         string
 	LogFiles       []File
 	DirPermission  os.FileMode

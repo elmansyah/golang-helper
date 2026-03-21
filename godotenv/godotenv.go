@@ -12,7 +12,7 @@ func New() App {
 
 type Setup func() App
 
-func (params *Params) Load() string {
+func (*Params) Load() string {
 	if err := godotenv.Load(".env"); err != nil {
 		panic("failed to load .env: " + err.Error())
 		
