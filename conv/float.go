@@ -1,7 +1,6 @@
 package conv
 
 import (
-	"fmt"
 	"strconv"
 )
 
@@ -57,7 +56,7 @@ func convStringToFloat[T ~float32 | ~float64](value string) (T, error) {
 	
 	result, err := strconv.ParseFloat(value, bitSize)
 	if err != nil {
-		return 0, fmt.Errorf("%v", err)
+		return 0, err
 	}
 	
 	return T(result), nil

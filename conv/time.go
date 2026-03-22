@@ -273,3 +273,53 @@ func ParseDateTimePtrFromPtr(value *string) *time.Time {
 func ParseDate(value string) time.Time {
 	return ParseDateTime(value)
 }
+
+func StringToTimeDuration(value string) time.Duration {
+	if value == "" {
+		return time.Duration(0)
+	}
+	
+	result, err := time.ParseDuration(value)
+	if err != nil {
+		return time.Duration(0)
+	}
+	
+	return result
+}
+
+func StringToTimeDurationPtr(value string) *time.Duration {
+	if value == "" {
+		return nil
+	}
+	
+	result := StringToTimeDuration(value)
+	
+	return &result
+}
+
+func StringPtrToTimeDuration(value *string) time.Duration {
+	if value == nil || *value == "" {
+		return time.Duration(0)
+	}
+	
+	return StringToTimeDuration(*value)
+}
+
+func StringPtrToTimeDurationPtr(value *string) *time.Duration {
+	if value == nil || *value == "" {
+		return nil
+	}
+	
+	result := StringPtrToTimeDuration(value)
+	
+	return &result
+}
+
+func LogTime() string {
+	timezone, err := time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		return ""
+	}
+	
+	return time.Now().In(timezone).Format("2006/01/02 15:04:05")
+}
